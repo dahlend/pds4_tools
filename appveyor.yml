@@ -8,9 +8,6 @@ environment:
   # 32-bit builds, which are not supported on Github Actions.
 
   matrix:
-    - PYTHON: "C:/Python27"
-      PYTHON_ARCH: "32"
-
     - PYTHON: "C:/Python39"
       PYTHON_ARCH: "32"
 

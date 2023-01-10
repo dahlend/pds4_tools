@@ -1,8 +1,3 @@
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import division
-from __future__ import unicode_literals
-
 # PDS4 namespace URIs and default corresponding prefixes. Contains only those that have required
 # special usage in the code, and thus must be known.
 PDS4_NAMESPACES = {'pds': 'http://pds.nasa.gov/pds4/pds/v1',

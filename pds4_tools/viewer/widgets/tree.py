@@ -1,8 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import textwrap
 import uuid
 
@@ -10,7 +5,7 @@ from collections import OrderedDict
 
 
 class TreeView(object):
-    """ A TreeView-like widget for TK. Supports Python 2.6, 2.7 and 3+.
+    """ A TreeView-like widget for TK.
 
      This widget creates a tree-view, including the ability to minimize and maximize individual leafs.
      It works by taking in a Text widget, and creating a tree-like view inside of it. You must also input a
