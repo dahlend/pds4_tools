@@ -11,11 +11,10 @@ from .widgets.tree import TreeView
 from ..reader.label_objects import (get_mission_area, get_discipline_area,
                                     get_spectral_characteristics_for_lid, get_display_settings_for_lid)
 
-from ..extern import six
-from ..extern.six.moves.tkinter import Menu, Text, BooleanVar, StringVar
+
+from tkinter import Text, BooleanVar, StringVar
 
 
-@six.add_metaclass(abc.ABCMeta)
 class LabelWindow(SearchableTextWindowMixIn, Window):
     """ Base class; Window used to display the content of a label """
 

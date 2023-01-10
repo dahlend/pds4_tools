@@ -8,6 +8,7 @@ import sys
 import pytest
 import warnings
 import numpy as np
+from collections import OrderedDict
 
 from . import PDS4ToolsTestCase
 
@@ -19,17 +20,14 @@ from ..reader.table_objects import TableStructure, TableManifest
 from ..reader.label_objects import Label
 
 from ..utils import compat
-from ..utils.compat import OrderedDict
 from ..utils.deprecation import PDS4ToolsDeprecationWarning, deprecated, rename_parameter, delete_parameter
-
-from ..extern import six
 
 
 class TestStructureList(PDS4ToolsTestCase):
 
-    def setup(self):
+    def setup_method(self):
 
-        super(TestStructureList, self).setup()
+        super(TestStructureList, self).setup_method()
         self.structures = pds4_read(self.data('äf.xml'), lazy_load=True, quiet=True)
 
     def test_get(self):
@@ -84,9 +82,9 @@ class TestStructureList(PDS4ToolsTestCase):
 
 class TestArrayStructure(PDS4ToolsTestCase):
 
-    def setup(self):
+    def setup_method(self):
 
-        super(TestArrayStructure, self).setup()
+        super(TestArrayStructure, self).setup_method()
 
         structures = pds4_read(self.data('äf.xml'), lazy_load=True, quiet=True)
         self.structure = structures[1]
@@ -127,9 +125,9 @@ class TestArrayStructure(PDS4ToolsTestCase):
 
 class TestTableStructure(PDS4ToolsTestCase):
 
-    def setup(self):
+    def setup_method(self):
 
-        super(TestTableStructure, self).setup()
+        super(TestTableStructure, self).setup_method()
 
         structures = pds4_read(self.data('äf.xml'), lazy_load=True, quiet=True)
         self.structure = structures[11]
@@ -269,9 +267,9 @@ class TestTableStructure(PDS4ToolsTestCase):
 
 class TestHeaderStructure(PDS4ToolsTestCase):
 
-    def setup(self):
+    def setup_method(self):
 
-        super(TestHeaderStructure, self).setup()
+        super(TestHeaderStructure, self).setup_method()
 
         structures = pds4_read(self.data('äf.xml'), lazy_load=True, quiet=True)
         self.structure = structures[0]
@@ -293,7 +291,7 @@ class TestHeaderStructure(PDS4ToolsTestCase):
 
         data = self.structure.data
 
-        assert isinstance(data, six.binary_type)
+        assert isinstance(data, bytes)
 
         assert data[0:9] == b'SIMPLE  ='
         assert data[800:838] == b'COMMENT University of Colorado Boulder'
@@ -306,7 +304,7 @@ class TestHeaderStructure(PDS4ToolsTestCase):
         parser = self.structure.parser()
         data_string = parser.to_string()
 
-        assert isinstance(data_string, six.text_type)
+        assert isinstance(data_string, str)
 
         assert data_string.startswith('SIMPLE  =')
         assert data_string.endswith('END')
@@ -323,9 +321,9 @@ class TestHeaderStructure(PDS4ToolsTestCase):
 
 class TestCharacterTable(PDS4ToolsTestCase):
 
-    def setup(self):
+    def setup_method(self):
 
-        super(TestCharacterTable, self).setup()
+        super(TestCharacterTable, self).setup_method()
 
         structures = pds4_read(self.data('colors.xml'), lazy_load=True, quiet=True)
         self.structure = structures[0]
@@ -352,9 +350,9 @@ class TestCharacterTable(PDS4ToolsTestCase):
 
 class TestDelimitedTable(PDS4ToolsTestCase):
 
-    def setup(self):
+    def setup_method(self):
 
-        super(TestDelimitedTable, self).setup()
+        super(TestDelimitedTable, self).setup_method()
 
         self.structures = pds4_read(self.data('Product_DelimitedTable.xml'), lazy_load=True, quiet=True)
 
@@ -416,9 +414,9 @@ class TestDelimitedTable(PDS4ToolsTestCase):
 
 class TestBinaryTable(PDS4ToolsTestCase):
 
-    def setup(self):
+    def setup_method(self):
 
-        super(TestBinaryTable, self).setup()
+        super(TestBinaryTable, self).setup_method()
 
         structures = pds4_read(self.data('äf.xml'), lazy_load=True, quiet=True)
         self.structure = structures[3]
@@ -509,9 +507,9 @@ class TestGroupFields(PDS4ToolsTestCase):
 
 class TestLabel(PDS4ToolsTestCase):
 
-    def setup(self):
+    def setup_method(self):
 
-        super(TestLabel, self).setup()
+        super(TestLabel, self).setup_method()
 
         self.label = Label.from_file(self.data('test_label.xml'))
 
@@ -846,9 +844,9 @@ class TestLabel(PDS4ToolsTestCase):
 
 class TestTableManifest(PDS4ToolsTestCase):
 
-    def setup(self):
+    def setup_method(self):
 
-        super(TestTableManifest, self).setup()
+        super(TestTableManifest, self).setup_method()
 
         label = Label().from_file(self.data('manifest_tester.xml'))
         table_label = label.find('.//Table_Character')
@@ -862,9 +860,9 @@ class TestTableManifest(PDS4ToolsTestCase):
 
 class TestTableDataTypes(PDS4ToolsTestCase):
 
-    def setup(self):
+    def setup_method(self):
 
-        super(TestTableDataTypes, self).setup()
+        super(TestTableDataTypes, self).setup_method()
 
         structures = pds4_read(self.data('test_table_data_types.xml'), lazy_load=True, quiet=True)
         self.table = structures[0]
@@ -1060,9 +1058,9 @@ class TestTableDataTypes(PDS4ToolsTestCase):
 
 class TestArrayDataTypes(PDS4ToolsTestCase):
 
-    def setup(self):
+    def setup_method(self):
 
-        super(TestArrayDataTypes, self).setup()
+        super(TestArrayDataTypes, self).setup_method()
 
         self.structures = pds4_read(self.data('test_array_data_types.xml'), lazy_load=True, quiet=True)
 
@@ -1169,9 +1167,9 @@ class TestArrayDataTypes(PDS4ToolsTestCase):
 
 class TestMaskedData(PDS4ToolsTestCase):
 
-    def setup(self):
+    def setup_method(self):
 
-        super(TestMaskedData, self).setup()
+        super(TestMaskedData, self).setup_method()
 
         self.structures = pds4_read(self.data('test_masked_data.xml'), lazy_load=True, quiet=True)
 

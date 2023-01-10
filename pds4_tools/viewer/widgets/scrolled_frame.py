@@ -3,7 +3,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from ...extern.six.moves.tkinter import Canvas, Frame, Scrollbar
+from tkinter import Canvas, Frame, Scrollbar
 
 
 class ScrolledFrame(Frame):

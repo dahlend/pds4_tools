@@ -8,8 +8,7 @@ import numpy as np
 
 from .data_types import pds_to_numpy_name
 
-from ..utils.compat import OrderedDict
-from ..extern import six
+from collections import OrderedDict
 
 
 # List of comparison functions. Used in __array_wrap__ to ensure they only
@@ -336,7 +335,7 @@ class PDS_ndarray(np.ndarray):
         meta_data = OrderedDict()
 
         # For a string key, we are requesting a single field and therefore just that field's meta data
-        if isinstance(key, six.string_types):
+        if isinstance(key, str):
             meta_data = self.meta_data.get(key)
 
         # For a slice, we must be requesting records, and therefore all fields, and therefore all meta data

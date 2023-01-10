@@ -16,7 +16,6 @@ from ..utils.helpers import xml_to_dict
 from ..utils.logging import logger_init
 from ..utils.exceptions import PDS4StandardsException
 
-from ..extern import six
 
 # Initialize the logger
 logger = logger_init()
@@ -823,14 +822,14 @@ class Label(object):
         # single prefix refers to multiple URIs (via local prefixes), only one will be kept.
         namespace_map = self.get_namespace_map(unmodified)
         known_namespaces = dict(chain(
-                                six.iteritems(PDS4_NAMESPACES),
-                                six.iteritems(dict((v, k) for k, v in six.iteritems(namespace_map)))))
+                                PDS4_NAMESPACES.items(),
+                                dict((v, k) for k, v in namespace_map.items()).items()))
 
         if (':' in match) and (namespaces is None):
             namespaces = known_namespaces
 
         elif ':' in match:
-            namespaces = dict(chain(six.iteritems(known_namespaces), six.iteritems(namespaces)))
+            namespaces = dict(chain(known_namespaces.items(), namespaces.items()))
 
         return namespaces
 

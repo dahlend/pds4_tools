@@ -24,13 +24,11 @@ from .widgets.notebook import TabBar, Tab
 from ..reader.data_types import is_pds_integer_data, data_type_convert_dates
 from ..reader.table_objects import Meta_Field
 
-from ..utils.compat import OrderedDict
+from collections import OrderedDict
 
-from ..extern import six
-from ..extern.six.moves import tkinter_colorchooser
-from ..extern.six.moves.tkinter import (Menu, Frame, Scrollbar, Listbox, Label, Entry, Button, Checkbutton,
+from tkinter import (Frame, Scrollbar, Listbox, Label, Entry, Button, Checkbutton,
                                         OptionMenu, DoubleVar, IntVar, BooleanVar, StringVar)
-from ..extern.six.moves.tkinter_tkfiledialog import asksaveasfilename
+from tkinter.filedialog import asksaveasfilename
 
 #################################
 
@@ -315,7 +313,7 @@ class PlotViewWindow(DataViewWindow):
                 value = _get_dash_pattern(key)
                 dash_dict[key] = value if not isinstance(value[1], (tuple, list)) else (value[0], list(value[1]))
 
-        line_style = [key for key, value in six.iteritems(dash_dict)
+        line_style = [key for key, value in dash_dict.items()
                       if error_line.get_linestyle()[0] == value]
 
         error_bar_options = {
@@ -367,7 +365,7 @@ class PlotViewWindow(DataViewWindow):
         colors['y_label'] = ax.yaxis.get_label().get_color()
 
         # Convert to MPL colors to a hex string
-        for name, mpl_color in six.iteritems(colors):
+        for name, mpl_color in colors.items():
 
             colors[name] = mpl_color_to_hex(mpl_color)
 
@@ -975,7 +973,7 @@ class PlotViewWindow(DataViewWindow):
         axes_menu.add_separator()
 
         invert_options = OrderedDict([('X', 'x'), ('Y', 'y'), ('XY', 'both')])
-        for axis, option in six.iteritems(invert_options):
+        for axis, option in invert_option.items():
 
             label = 'Invert {0}'.format(axis)
 
@@ -991,7 +989,7 @@ class PlotViewWindow(DataViewWindow):
                                     ('SymLog-SymLog', 'symlog-symlog'),
                                     ('X-Log', 'log-linear'), ('Y-Log', 'linear-log'),
                                     ('X-SymLog', 'symlog-linear'), ('Y-SymLog', 'linear-symlog')])
-        for label, scale in six.iteritems(axis_scaling):
+        for label, scale in axis_scaling.items():
 
             if 'X' in label:
                 axis_scaling_menu.add_separator()
@@ -1662,7 +1660,7 @@ class PlotViewWindow(DataViewWindow):
             ax.tick_params(axis='both', which='minor', length=0, width=0)
 
         # Remove offset and scientific notation when tick labels are not shown
-        for axis_name, axis_select in six.iteritems({'x': ax.xaxis, 'y': ax.yaxis}):
+        for axis_name, axis_select in [['x', ax.xaxis], ['y', ax.yaxis]]:
 
             if isinstance(axis_select.get_major_formatter(), mpl.ticker.ScalarFormatter):
 
@@ -1838,7 +1836,7 @@ class PlotViewWindow(DataViewWindow):
         default_filetype_name = filetypes[default_filetype]
         del filetypes[default_filetype]
 
-        sorted_filetypes = list(six.iteritems(filetypes))
+        sorted_filetypes = list(filetypes.items())
         sorted_filetypes.sort()
         sorted_filetypes.insert(0, (default_filetype, default_filetype_name))
 

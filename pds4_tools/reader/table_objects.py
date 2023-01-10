@@ -1,24 +1,17 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import re
 import abc
 import sys
 import numpy as np
+from collections.abc import Sequence
 
 from .general_objects import Structure, Meta_Class, Meta_Structure
 from .label_objects import Meta_SpectralCharacteristics
 from .data_types import pds_to_numpy_name, PDSdtype
 
-from ..utils.compat import OrderedDict
 from ..utils.helpers import is_array_like, dict_extract
 from ..utils.exceptions import PDS4StandardsException
 from ..utils.logging import logger_init
 
-from ..extern import six
-from ..extern.six.moves import collections_abc
 from ..extern.cached_property import threaded_cached_property
 
 # Initialize the logger
@@ -238,7 +231,7 @@ class TableStructure(Structure):
         """
 
         # Search by full or partial field name for single-valued search
-        if isinstance(key, six.string_types):
+        if isinstance(key, str):
             return self.field(key)
 
         # Search by full or partial field name for multi-valued search
@@ -313,7 +306,7 @@ class TableStructure(Structure):
         return_fields = []
 
         # Search by index or slice
-        if isinstance(key, six.integer_types) or isinstance(key, slice):
+        if isinstance(key, int) or isinstance(key, slice):
             return self.fields[key]
 
         # Search by name (full or partial)
@@ -549,7 +542,7 @@ class Meta_TableStructure(Meta_Structure):
         # Add Meta_SpectralCharacteristics if they exist in the label
         if ('local_identifier' in obj) and (full_label is not None):
 
-            local_identifier = six.text_type(obj['local_identifier'])
+            local_identifier = str(obj['local_identifier'])
 
             try:
                 obj.spectral_characteristics = Meta_SpectralCharacteristics.from_full_label(full_label, local_identifier)
@@ -606,7 +599,7 @@ class Meta_TableStructure(Meta_Structure):
         return False
 
 
-class TableManifest(collections_abc.Sequence):
+class TableManifest(Sequence):
     """ Stores a single table's Meta_Fields and Meta_Groups
 
     The manifest is a representation the table, with fields and groups in the same order as they physically
@@ -1149,7 +1142,7 @@ class TableManifest(collections_abc.Sequence):
                 counter = 0
 
             if 'name' not in group:
-                group['name'] = 'GROUP_' + six.text_type(counter)
+                group['name'] = 'GROUP_' + str(counter)
 
             prev_parent = parent_idx
 
@@ -1411,7 +1404,6 @@ class TableManifest(collections_abc.Sequence):
                                        "for field {2}".format(item['format'], width, full_location_warn))
 
 
-@six.add_metaclass(abc.ABCMeta)
 class Meta_TableElement(Meta_Class):
     """ Stores meta data about any table element.
 
@@ -1537,7 +1529,7 @@ class Meta_TableElement(Meta_Class):
             for i in range(0, len(location)):
 
                 key = list(location[i].keys())[0]
-                value = six.text_type(list(location[i].values())[0])
+                value = str(list(location[i].values())[0])
 
                 # Add key/value to name
                 if key == 'overlap':

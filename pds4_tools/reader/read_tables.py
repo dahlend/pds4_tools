@@ -19,9 +19,6 @@ from .data_types import (data_type_convert_table_ascii, data_type_convert_table_
 from ..utils.constants import PDS4_TABLE_TYPES
 from ..utils.logging import logger_init
 
-from ..extern import six
-from ..extern.six.moves import range
-
 # Initialize the logger
 logger = logger_init()
 
@@ -120,7 +117,7 @@ def _make_uniformly_sampled_field(table_structure, uni_sampled_field):
     # If the first and last value (one of which should contain the largest possible value) are integers,
     # there is a chance that the uniformly sampled field contains integers larger than even double supports
     # (without Inf). Therefore we check this, and use 'object' dtype in such a case.
-    if isinstance(first_value, six.integer_types) and isinstance(last_value, six.integer_types):
+    if isinstance(first_value, int) and isinstance(last_value, int):
         dtype = get_min_integer_numpy_type([first_value, last_value])
 
         if dtype == 'object':
@@ -503,13 +500,6 @@ def _get_delimited_records_and_start_bytes(records, table_structure, table_manif
     for i in range(0, num_columns + 1):
         start_bytes[i] = np.empty(len(records), dtype=array_dtype)
 
-    # In Python 3, when checking for the first and last character below, we need to convert the value
-    # to a ``str``, since obtaining first character of a ``bytes`` returns a byte value. In Python 2, no
-    # action needs to be taken since the value is ``str`` by default.
-    if six.PY2:
-        str_args = ()
-    else:
-        str_args = ('utf-8', )
 
     # Obtain start bytes for each column in each record, and adjust the record itself such that only the
     # start byte is required to obtain the entire value (to save RAM). The latter is needed due to the
@@ -534,7 +524,7 @@ def _get_delimited_records_and_start_bytes(records, table_structure, table_manif
             while column_idx < split_record_len:
                 value = split_record[column_idx]
                 value_length = len(value)
-                first_character = str(value, *str_args)[0] if value_length > 0 else None
+                first_character = str(value, 'utf-8')[0] if value_length > 0 else None
 
                 # If field value starts with a quote then we need to check if there is a matching closing
                 # quote somewhere further.
@@ -557,7 +547,7 @@ def _get_delimited_records_and_start_bytes(records, table_structure, table_manif
                     # character in the value (and thus the two quotes enclosed a single value)
                     if next_quote_idx >= 0:
                         next_value = split_record[next_quote_idx]
-                        last_character = str(next_value, *str_args)[-1] if len(next_value) > 0 else None
+                        last_character = str(next_value, 'utf-8')[-1] if len(next_value) > 0 else None
 
                         if last_character == '"':
 
@@ -941,8 +931,7 @@ def read_table_data(table_structure, no_scale, decode_strings, masked):
                 raise TypeError('Unknown table type: {0}'.format(table_structure.type))
 
         except ValueError as e:
-            six.raise_from(ValueError("Unable to convert field '{0}' to data_type '{1}': {2}"
-                                      .format(field['name'], field.data_type(), repr(e.args[0]))), None)
+            raise ValueError("Unable to convert field '{0}' to data_type '{1}': {2}".format(field['name'], field.data_type(), repr(e.args[0]))) from None
 
         # Save a preliminary version of each field
         # (cast to its initial data type but without any scaling or other adjustments)

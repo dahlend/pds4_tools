@@ -7,11 +7,11 @@ import os
 import ssl
 import atexit
 import tempfile
+import urllib
+from urllib import request
+from urllib.error import URLError
 
 from ..utils.logging import logger_init
-
-from ..extern import six
-from ..extern.six.moves import urllib
 
 # Safe import of Certifi
 try:
@@ -105,18 +105,18 @@ def download_file(url, force=False, block_size=65536, timeout=10):
         try:
 
             try:
-                remote = urllib.request.urlopen(url, timeout=timeout, **kwargs)
+                remote = request.urlopen(url, timeout=timeout, **kwargs)
 
             # If Certifi is available but received an SSL error, try system default certificates
-            except urllib.error.URLError as e:
+            except URLError as e:
 
                 if (certifi is not None) and isinstance(e.reason, ssl.SSLError):
-                    remote = urllib.request.urlopen(url, timeout=timeout)
+                    remote = request.urlopen(url, timeout=timeout)
                 else:
                     raise
 
         # Improve error message for unexpected errors
-        except urllib.error.URLError as e:
+        except URLError as e:
 
             try:
                 e.msg = '{0} for URL: {1}'.format(e.msg, url)
@@ -127,7 +127,7 @@ def download_file(url, force=False, block_size=65536, timeout=10):
                 except AttributeError:
                     pass
 
-            raise six.raise_from(e, None)
+            raise e from None
 
         # Obtain size of file to download
         info = remote.info()
@@ -262,10 +262,7 @@ def _process_url(url):
 
     # URL decode, e.g. in case user is pasting UTF8 URLs from a browser URL bar, which for most
     # popular browsers will encode first
-    if six.PY2:
-        url = urllib.parse.unquote(url.encode('utf-8')).decode('utf-8')
-    else:
-        url = urllib.parse.unquote(url)
+    url = urllib.parse.unquote(url)
 
     # URL encode, necessary for URLs with non-ASCII characters or urllib will raise an Exception.
     # The above combination of decode first (which does nothing if not already encoded) then encode allows us to

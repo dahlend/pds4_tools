@@ -11,7 +11,7 @@ import shutil
 
 from ..utils.logging import logger_init
 
-from ..extern import six, appdirs
+from ..extern import appdirs
 
 # Initialize the logger
 logger = logger_init()
@@ -98,7 +98,7 @@ def write_recently_opened(file_paths, append=True, update_last_open_dir=True):
     max_files = 10
 
     # Allow a single file path as a string-like
-    if isinstance(file_paths, (six.binary_type, six.text_type)):
+    if isinstance(file_paths, (bytes, str)):
         file_paths = [file_paths]
 
     # Append *file_paths* to previously opened files if requested
@@ -238,16 +238,8 @@ def _write_cache_data(cache_data):
     try:
 
         with io.open(cache_file, 'w', encoding='utf-8') as file_handler:
-
-            # Python 2's ``json.dump`` has a bug when ensure_ascii is False, where some data turns
-            # out as str instead of unicode
-            if six.PY2:
-                cache_data = json.dumps(cache_data, ensure_ascii=False, encoding='utf-8')
-                file_handler.write(unicode(cache_data))
-
             # Python 3 gets rid of encoding attribute in ``json.dump``, does right thing by default
-            else:
-                json.dump(cache_data, file_handler, ensure_ascii=False)
+            json.dump(cache_data, file_handler, ensure_ascii=False)
 
     except (OSError, IOError, UnicodeError) as e:
 

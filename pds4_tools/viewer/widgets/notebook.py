@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 
 import platform
 
-from ...utils.compat import OrderedDict
-from ...extern.six.moves.tkinter import Frame, Button
+from collections import OrderedDict
+from tkinter import Frame, Button
 
 
 _BASE = 'raised'

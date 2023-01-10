@@ -6,8 +6,7 @@ from __future__ import unicode_literals
 import functools
 import numpy as np
 
-from ..utils.compat import OrderedDict
-from ..extern import six
+from collections import OrderedDict
 
 #################################
 
@@ -54,9 +53,8 @@ def is_array_like(value):
         True if *value* is array-like, false otherwise.
     """
 
-    # Checks if value implements __len__, and ensures its not a string (six is used because
-    # str, unicode, and bytes can all represent strings, depending on the Python version)
-    if hasattr(value, '__len__') and (not isinstance(value, (six.binary_type, six.text_type,
+    # Checks if value implements __len__, and ensures its not a string
+    if hasattr(value, '__len__') and (not isinstance(value, (bytes, str,
                                                              np.ma.core.MaskedConstant))):
         return True
 
@@ -210,7 +208,7 @@ def xml_to_dict(xml_element, skip_attributes=False, cast_values=False, cast_igno
                                              cast_ignore=cast_ignore, tag_modify=tag_modify)
 
         for dc in map(xml_to_dict_func, children):
-            for k, v in six.iteritems(dc):
+            for k, v in dc.items():
                 try:
                     dd[k].append(v)
                 except KeyError:
@@ -218,7 +216,7 @@ def xml_to_dict(xml_element, skip_attributes=False, cast_values=False, cast_igno
 
         ddd = OrderedDict()
 
-        for k, v in six.iteritems(dd):
+        for k, v in dd.items():
             if len(v) == 1:
                 ddd[k] = v[0]
             else:
@@ -233,7 +231,7 @@ def xml_to_dict(xml_element, skip_attributes=False, cast_values=False, cast_igno
 
         attrib = OrderedDict()
 
-        for k, v in six.iteritems(xml_element.attrib):
+        for k, v in xml_element.attrib.items():
 
             # Tag modify for attribute names
             new_k = '@' + k
@@ -249,7 +247,7 @@ def xml_to_dict(xml_element, skip_attributes=False, cast_values=False, cast_igno
 
             attrib[new_k] = new_v
 
-        d[element_tag].update((k, v) for k, v in six.iteritems(attrib))
+        d[element_tag].update((k, v) for k, v in attrib.items())
 
     # Add text elements
     text = xml_element.text

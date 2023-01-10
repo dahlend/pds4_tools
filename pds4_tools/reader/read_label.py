@@ -10,8 +10,6 @@ from ..utils import compat
 from ..utils.constants import PDS4_NAMESPACES
 from ..utils.logging import logger_init
 
-from ..extern import six
-
 # Initialize the logger
 logger = logger_init()
 
@@ -71,7 +69,7 @@ def read_label(filename, strip_extra_whitespace=True, enforce_default_prefixes=F
 
                 if enforce_default_prefixes:
 
-                    for prefix, uri in six.iteritems(PDS4_NAMESPACES):
+                    for prefix, uri in PDS4_NAMESPACES.items():
 
                         # Ensure the PDS4 namespace is the default prefix
                         if elem[1] == PDS4_NAMESPACES['pds']:
@@ -103,7 +101,7 @@ def read_label(filename, strip_extra_whitespace=True, enforce_default_prefixes=F
             if strip_extra_whitespace:
 
                 subiter = compat.ET_Tree_iter(ET.ElementTree(elem))
-                attribs = six.iteritems(elem.attrib)
+                attribs = elem.attrib.items()
 
                 # Strip whitespaces at beginning and end of value in elements that do not have children
                 if len(elem) == 0:
@@ -119,79 +117,16 @@ def read_label(filename, strip_extra_whitespace=True, enforce_default_prefixes=F
 
         label_xml_root = xml_tree.root
 
-        # For Python 2, we can decode all ``str`` to ``unicode``, such that all meta data strings
-        # are consistently unicode.
-        if six.PY2 and decode_py2:
-            label_xml_root = _decode_tree(label_xml_root)
 
     # Raise exception if XML cannot be parsed. In Python 3 we raise from None to avoid confusing re-raise
     except (ExpatError, compat.ET_ParseError):
-        six.raise_from(
-            ExpatError('The requested PDS4 label file does not appear contain valid XML: ' + filename), None)
+        raise ExpatError('The requested PDS4 label file does not appear contain valid XML: ' + filename) from None
 
     if include_namespace_map:
         return label_xml_root, namespace_map
 
     else:
         return label_xml_root
-
-
-def _decode_tree(xml_tree):
-    """ Decode an XML tree from UTF-8 encoded ``str`` to ``unicode``.
-
-    Decodes all element tags and text, as well as attribute names and values. Do not call gratuitously
-    due to efficiency concerns.
-
-    Notes
-    -----
-    This function is intended to be used solely in Python 2. Python 3 has no ``unicode`` data type,
-    all ``str`` are essentially ``unicode`` by default.
-
-    Parameters
-    ----------
-    xml_tree : ``ElementTree`` Element
-        The XML tree to decoded.
-
-    Returns
-    -------
-    ``ElementTree`` Element
-        The decoded XML tree, with all strings converted to ``unicode`` from UTF-8 ``str``.
-    """
-
-    # This function is designed to work solely in Python 2; otherwise we return the tree unchanged.
-    if not six.PY2:
-        return xml_tree
-
-    # Function that decodes all passed in text to unicode, assuming it's encoded as UTF-8
-    def decode(text):
-
-        if text is None:
-            return None
-
-        if isinstance(text, str):
-            return text.decode('utf-8')
-
-        return text
-
-    # Loop over all elements in the tree
-    for elem in compat.ET_Element_iter(xml_tree):
-
-        # Decode elements
-        elem.tag = decode(elem.tag)
-        elem.text = decode(elem.text)
-        elem.tail = decode(elem.tail)
-
-        # Decode attributes
-        for name, value in elem.attrib.items():
-
-            del elem.attrib[name]
-            name = decode(name)
-
-            value = decode(value)
-
-            elem.attrib[name] = value
-
-    return xml_tree
 
 
 def _non_blank_line_count(string):

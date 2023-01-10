@@ -1,19 +1,14 @@
 # This module contains classes and methods that require
 # matplotlib, but are used across more than one viewer
 # window or do not better fit elsewhere
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import sys
 import warnings
+from importlib import reload_module
 
 import numpy as np
 import matplotlib as mpl
 
-from ..utils.compat import OrderedDict
-from ..extern.six.moves import reload_module
+from collections import OrderedDict
 
 # Initialize TK backend for MPL safely prior to importing from backend
 if mpl.get_backend() != 'TkAgg':

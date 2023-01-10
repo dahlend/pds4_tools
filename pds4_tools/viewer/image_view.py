@@ -18,16 +18,15 @@ from . import cache
 from .core import Window, DataViewWindow
 from .mpl import FigureCanvas, MPLCompat
 
-from ..utils.compat import OrderedDict
+from collections import OrderedDict
 from ..utils.helpers import finite_min_max, is_array_like
 from ..utils.exceptions import PDS4StandardsException
 from ..utils.logging import logger_init
 
 from ..extern.zscale import zscale
-from ..extern import six
-from ..extern.six.moves.tkinter import (Menu, Frame, Scrollbar, Label, Entry, Scale, Button,
+from tkinter import (Frame, Scrollbar, Label, Entry, Scale, Button,
                                           Radiobutton, StringVar, BooleanVar, DoubleVar, IntVar)
-from ..extern.six.moves.tkinter_tkfiledialog import asksaveasfilename
+from tkinter.filedialog import asksaveasfilename
 
 # Initialize the logger
 logger = logger_init()
@@ -516,7 +515,7 @@ class ImageViewWindow(DataViewWindow):
             type_ = None
             slice_ = 0
 
-            for type, seq_number in six.iteritems(type_to_number):
+            for type, seq_number in type_to_number.items():
 
                 if seq_number == sequence:
                     type_ = type
@@ -574,7 +573,7 @@ class ImageViewWindow(DataViewWindow):
         previous_slice = axis_properties['slice']
         num_slices = axis_properties['length'] - 1
 
-        if isinstance(index, six.text_type):
+        if isinstance(index, str):
 
             if index == 'next':
                 new_slice = previous_slice + 1
@@ -595,7 +594,7 @@ class ImageViewWindow(DataViewWindow):
 
         else:
 
-            if (not isinstance(index, six.integer_types)) or (index > num_slices) or (index < 0):
+            if (not isinstance(index, int)) or (index > num_slices) or (index < 0):
                 raise IndexError('Invalid slice selection specified: {0}'.format(index))
 
             new_slice = index
@@ -867,7 +866,7 @@ class ImageViewWindow(DataViewWindow):
         ticks_menu = self._add_menu('Ticks', in_menu='View')
 
         show_ticks = OrderedDict([('X', 'x'), ('Y', 'y'), ('XY', 'both')])
-        for label, option in six.iteritems(show_ticks):
+        for label, option in show_ticks.items():
             ticks_menu.add_checkbutton(label='Show {0} Ticks'.format(label), onvalue=option,
                                        offvalue='none', variable=self._menu_options['show_axis_ticks'])
 
@@ -930,7 +929,7 @@ class ImageViewWindow(DataViewWindow):
         # Image Invert options
         invert_options = OrderedDict([('None', 'none'), ('Invert X', 'x'),
                                       ('Invert Y', 'y'), ('Invert XY', 'both')])
-        for label, option in six.iteritems(invert_options):
+        for label, option in invert_options.items():
 
             zoom_menu.add_checkbutton(label=label, onvalue=option, offvalue=option,
                                             variable=self._menu_options['invert_axis'])
@@ -2166,7 +2165,7 @@ class ImageViewWindow(DataViewWindow):
         default_filetype_name = filetypes[default_filetype]
         del filetypes[default_filetype]
 
-        sorted_filetypes = list(six.iteritems(filetypes))
+        sorted_filetypes = list(filetypes.items())
         sorted_filetypes.sort()
         sorted_filetypes.insert(0, (default_filetype, default_filetype_name))
 

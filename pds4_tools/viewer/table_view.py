@@ -18,9 +18,7 @@ from ..reader.data import PDS_array
 from ..utils.helpers import is_array_like
 from ..utils.logging import logger_init
 
-from ..extern import six
-from ..extern.six.moves.tkinter import (Menu, Frame, Text, Label, Entry, Button, Scrollbar,
-                                        BooleanVar, TclError)
+from tkinter import (Frame, Text, Label, Entry, Button, Scrollbar, BooleanVar, TclError)
 
 # Initialize the logger
 logger = logger_init()
@@ -305,9 +303,8 @@ class TabularViewWindow(DataViewWindow):
                 data_point = '0x' + binascii.hexlify(data_point_bytes).decode('ascii').upper()
 
             # Decode byte strings to unicode strings. Done because byte strings with UTF-8 characters cannot be
-            # properly formatted, and so that on Python 2 the warning below does not error out if a non-ASCII
-            # data value was not able to be formatted.
-            elif isinstance(data_point, six.binary_type):
+            # properly formatted.
+            elif isinstance(data_point, bytes):
                 data_point = data_point.decode('utf-8')
 
             # Set display values for data points

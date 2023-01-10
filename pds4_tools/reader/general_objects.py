@@ -5,15 +5,15 @@ from __future__ import unicode_literals
 
 import sys
 import abc
+from abc import ABC
+from collections.abc import Sequence
 
-from ..utils.compat import OrderedDict
+from collections import OrderedDict
 from ..utils.helpers import xml_to_dict, is_array_like
 from ..utils.data_access import is_supported_url, download_file
 from ..utils.exceptions import PDS4StandardsException
 from ..utils.logging import logger_init
 
-from ..extern import six
-from ..extern.six.moves import collections_abc
 
 # Initialize the logger
 logger = logger_init()
@@ -21,7 +21,7 @@ logger = logger_init()
 #################################
 
 
-class StructureList(collections_abc.Sequence):
+class StructureList(Sequence):
     """ Stores the label and all supported data structures of a PDS4 product.
 
         An object of this type is returned by `pds4_read`. PDS4 supported data structures are forms of Arrays,
@@ -110,7 +110,7 @@ class StructureList(collections_abc.Sequence):
         >>> struct_list[0:2]
         """
 
-        if isinstance(key, six.integer_types) or isinstance(key, slice):
+        if isinstance(key, int) or isinstance(key, slice):
             structure = self.structures[key]
 
         else:
@@ -244,7 +244,7 @@ class StructureList(collections_abc.Sequence):
         key = key[0], int(key[1])
 
         # Re-use tuple logic when given a string id_type
-        if isinstance(id_type, six.string_types):
+        if isinstance(id_type, str):
             id_type = [id_type]
 
         # Look for a match for each id_type in the order they are specified
@@ -269,8 +269,7 @@ class StructureList(collections_abc.Sequence):
         return None
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Structure(object):
+class Structure(ABC):
     """ Stores a single PDS4 data structure.
 
         Subclassed by `ArrayStructure`, `TableStructure` and `HeaderStructure`.
@@ -579,7 +578,7 @@ class Meta_Class(OrderedDict):
         items = list(xml_to_dict(xml, skip_attributes=True, cast_values=cast_values,
                                  cast_ignore=cast_ignore, tag_modify=tag_modify).values())[0]
 
-        for key, value in six.iteritems(items):
+        for key, value in items.items():
             self[key] = value
 
     def _check_keys_exist(self, keys, sub_element=None, is_sequence=False):

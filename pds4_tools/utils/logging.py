@@ -7,8 +7,6 @@ import sys
 import copy
 import logging
 
-from ..extern import six
-
 # Minimum logging levels for loud and quiet operation
 _loud = logging.DEBUG
 _quiet = logging.ERROR
@@ -81,7 +79,7 @@ def set_loglevel(level):
 
     global _user_level
 
-    if isinstance(level, six.string_types):
+    if isinstance(level, str):
         _user_level = getattr(logging, level.upper())
     else:
         _user_level = level
@@ -228,7 +226,7 @@ class PDS4Logger(logging.Logger, object):
         None
         """
 
-        if isinstance(level, six.string_types):
+        if isinstance(level, str):
             level = level.upper()
 
         if handler_name is None:
@@ -319,44 +317,7 @@ class PDS4StreamHandler(logging.StreamHandler):
         not available earlier.
         """
 
-        # Python >= 3.2 (i.e. all PY3 versions supported by this code) provides `self.terminator` by default
-        if six.PY3:
-            super(PDS4StreamHandler, self).emit(record)
-
-        # For PY2, we copy directly from Python 2.7's emit, which also works for Python 2.6. A minor
-        # modification is made to allow `self.terminator` attribute to work
-        else:
-
-            try:
-                unicode
-                _unicode = True
-            except NameError:
-                _unicode = False
-
-            try:
-                msg = self.format(record)
-                stream = self.stream
-                fs = b"%s{0}".format(self.terminator)
-                if not _unicode:
-                    stream.write(fs % msg)
-                else:
-                    try:
-                        if (isinstance(msg, unicode) and
-                                getattr(stream, 'encoding', None)):
-                            ufs = u'%s{0}'.format(self.terminator)
-                            try:
-                                stream.write(ufs % msg)
-                            except UnicodeEncodeError:
-                                stream.write((ufs % msg).encode(stream.encoding))
-                        else:
-                            stream.write(fs % msg)
-                    except UnicodeError:
-                        stream.write(fs % msg.encode("UTF-8"))
-                self.flush()
-            except (KeyboardInterrupt, SystemExit):
-                raise
-            except:
-                self.handleError(record)
+        super(PDS4StreamHandler, self).emit(record)
 
     @property
     def name(self):
@@ -413,7 +374,7 @@ class PDS4StreamHandler(logging.StreamHandler):
             Level to set for handler. See Python documentation on logger levels for details.
         """
 
-        if isinstance(level, six.string_types):
+        if isinstance(level, str):
             level = level.upper()
 
         logging.StreamHandler.setLevel(self, level)
@@ -458,8 +419,8 @@ class PDS4SilentHandler(PDS4StreamHandler):
         new_msg = record.msg
         last_msg = self.records[-1].msg if self.records else None
 
-        new_msg_has_cr = isinstance(new_msg, six.string_types) and ('\r' in new_msg)
-        last_msg_has_cr = isinstance(last_msg, six.string_types) and ('\r' in last_msg)
+        new_msg_has_cr = isinstance(new_msg, str) and ('\r' in new_msg)
+        last_msg_has_cr = isinstance(last_msg, str) and ('\r' in last_msg)
 
         if new_msg_has_cr or last_msg_has_cr:
 

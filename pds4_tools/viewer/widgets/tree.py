@@ -6,8 +6,7 @@ from __future__ import unicode_literals
 import textwrap
 import uuid
 
-from ...utils.compat import OrderedDict
-from ...extern import six
+from collections import OrderedDict
 
 
 class TreeView(object):
@@ -205,7 +204,7 @@ class Element(object):
 
         # Remove any whitespace at the beginning and end of value, for a more consistent appearance
         if value is not None:
-            value = six.text_type(value).strip()
+            value = str(value).strip()
 
         # Add newline after text if requested
         if add_newline:

@@ -3,20 +3,6 @@ pds4_tools.utils.compat module
 
 .. currentmodule:: pds4_tools.utils.compat
 
-Modules
--------
-
- argparse
-
-    An alias of ``argparse``.
-
-
-Classes
--------
-
-.. class:: OrderedDict
-
-    An alias of ``collections.OrderedDict``.
 
 Functions
 ---------

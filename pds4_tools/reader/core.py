@@ -17,7 +17,6 @@ from ..utils.data_access import is_supported_url, download_file
 from ..utils.constants import PDS4_DATA_ROOT_ELEMENTS, PDS4_DATA_FILE_AREAS, PDS4_TABLE_TYPES
 from ..utils.logging import logger_init
 
-from ..extern import six
 
 # Initialize the logger
 logger = logger_init()
@@ -358,8 +357,8 @@ def read_byte_data(data_filename, start_byte, stop_byte):
         return byte_data
 
     except IOError as e:
-        raise six.raise_from(IOError("Unable to read data from file '" + data_filename +
-                                     "' found in label - {0}".format(e)), None)
+        raise IOError("Unable to read data from file '" + data_filename +
+                                     "' found in label - {0}".format(e))
 
 
 def _handle_exception(exc_type, exc_value, exc_traceback):

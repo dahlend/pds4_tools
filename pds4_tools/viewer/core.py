@@ -13,14 +13,13 @@ import traceback
 import subprocess
 
 from . import cache
-from ..utils.compat import argparse
+import argparse
 from ..utils.helpers import is_array_like
 from ..utils.logging import logger_init
 
-from ..extern import six
-from ..extern.six.moves.tkinter import Event as TKEvent
-from ..extern.six.moves.tkinter import (Tk, Toplevel, PhotoImage, Menu, Scrollbar, Canvas, Frame, Label,
-                                        Entry, Text, Button, Checkbutton, BooleanVar, StringVar, TclError)
+from tkinter import Event as TKEvent
+from tkinter import (Tk, Toplevel, PhotoImage, Menu, Scrollbar, Canvas, Frame, Label,
+                     Entry, Text, Button, Checkbutton, BooleanVar, StringVar, TclError)
 
 # NOTE: DO NOT IMPORT MATPLOTLIB HERE, or import any other module
 # that in-turn imports MPL. See  note in ``_mpl_commands`` below
@@ -283,7 +282,7 @@ class Window(object):
 
         else:
 
-            if isinstance(index, six.string_types):
+            if isinstance(index, str):
                 index = in_menu_wg.index(index)
 
             in_menu_wg.insert_cascade(index, label=name, menu=new_menu)
@@ -392,7 +391,7 @@ class Window(object):
 
         if name is None:
 
-            for callbacks in six.itervalues(self._callbacks):
+            for callbacks in self._callbacks.items():
 
                 for callback in callbacks:
                     callback()

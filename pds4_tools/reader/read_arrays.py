@@ -11,7 +11,6 @@ from .data_types import (data_type_convert_array, pds_to_numpy_type, apply_scali
                          mask_special_constants)
 
 from ..utils.logging import logger_init
-from ..extern import six
 
 # Initialize the logger
 logger = logger_init()
@@ -71,8 +70,8 @@ def _read_array_byte_data(array_structure, as_string=True, memmap=False):
                 data = np.fromfile(file_handler, dtype='int8', count=num_int8_elements)
 
     except IOError as e:
-        raise six.raise_from(IOError("Unable to read data from file '" + data_filename +
-                                     "' found in label - {0}".format(e)), None)
+        raise IOError("Unable to read data from file '" + data_filename +
+                                     "' found in label - {0}".format(e))
 
     # Convert to a byte string if requested
     if as_string:
@@ -215,7 +214,7 @@ def new_array(input, no_scale=False, no_bitmask=False, masked=None, copy=True, *
         # Apply the bit mask to extracted_data if necessary
         bit_mask = (meta_data.get('Object_Statistics') or {}).get('bit_mask')
         if (not no_bitmask) and (bit_mask is not None):
-            bit_mask_string = six.text_type(bit_mask).zfill(array.dtype.itemsize * 8)
+            bit_mask_string = str(bit_mask).zfill(array.dtype.itemsize * 8)
             _apply_bitmask(array, bit_mask_string, special_constants=special_constants)
 
         # Adjust data values to account for 'scaling_factor' and 'value_offset' (in-place if possible)

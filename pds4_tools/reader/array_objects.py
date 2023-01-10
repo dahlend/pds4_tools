@@ -11,12 +11,11 @@ from .data_types import apply_scaling_and_value_offset, PDSdtype
 
 from ..utils.exceptions import PDS4StandardsException
 
-from ..extern import six
 from ..extern.cached_property import threaded_cached_property
 
 
 class ArrayStructure(Structure):
-    """ Stores a single PDS4 array data structure.
+    """Stores a single PDS4 array data structure.
 
     Contains the array's data, meta data and label portion. All forms of Array
     (e.g. Array, Array_2D, Array_3D_Image, etc) are stored by this class.
@@ -29,9 +28,16 @@ class ArrayStructure(Structure):
     """
 
     @classmethod
-    def from_file(cls, data_filename, structure_label, full_label,
-                  lazy_load=False, no_scale=False, decode_strings=None):
-        """ Create an array structure from relevant labels and file for the data.
+    def from_file(
+        cls,
+        data_filename,
+        structure_label,
+        full_label,
+        lazy_load=False,
+        no_scale=False,
+        decode_strings=None,
+    ):
+        """Create an array structure from relevant labels and file for the data.
 
         Parameters
         ----------
@@ -57,12 +63,18 @@ class ArrayStructure(Structure):
         """
 
         # Create the meta data structure for this array
-        meta_array_structure = Meta_ArrayStructure.from_label(structure_label, full_label)
+        meta_array_structure = Meta_ArrayStructure.from_label(
+            structure_label, full_label
+        )
 
         # Create the data structure for this array
-        array_structure = cls(structure_data=None, structure_meta_data=meta_array_structure,
-                              structure_label=structure_label, full_label=full_label,
-                              parent_filename=data_filename)
+        array_structure = cls(
+            structure_data=None,
+            structure_meta_data=meta_array_structure,
+            structure_label=structure_label,
+            full_label=full_label,
+            parent_filename=data_filename,
+        )
         array_structure._no_scale = no_scale
 
         # Attempt to access the data property such that the data gets read-in (if not on lazy-load)
@@ -72,8 +84,10 @@ class ArrayStructure(Structure):
         return array_structure
 
     @classmethod
-    def from_array(cls, input, no_scale=False, no_bitmask=False, masked=None, **structure_kwargs):
-        """ Create an array structure from PDS-compliant data or meta data.
+    def from_array(
+        cls, input, no_scale=False, no_bitmask=False, masked=None, **structure_kwargs
+    ):
+        """Create an array structure from PDS-compliant data or meta data.
 
         Parameters
         ----------
@@ -106,10 +120,16 @@ class ArrayStructure(Structure):
 
         from .read_arrays import new_array
 
-        return new_array(input, no_scale=no_scale, no_bitmask=no_bitmask, masked=masked, **structure_kwargs)
+        return new_array(
+            input,
+            no_scale=no_scale,
+            no_bitmask=no_bitmask,
+            masked=masked,
+            **structure_kwargs
+        )
 
     def info(self, abbreviated=False, output=None):
-        """ Prints a summary of this data structure.
+        """Prints a summary of this data structure.
 
         Contains the type and dimensions of the Array, and if *abbreviated* is False then
         also outputs the name and number of elements of each axis in the array.
@@ -137,7 +157,9 @@ class ArrayStructure(Structure):
         # Obtain abbreviated version of summary
         dimensions = self.meta_data.dimensions()
         id = "'{0}'".format(self.id)
-        axes_info = '{0} axes, {1}'.format(len(dimensions), ' x '.join(six.text_type(dim) for dim in dimensions))
+        axes_info = "{0} axes, {1}".format(
+            len(dimensions), " x ".join(str(dim) for dim in dimensions)
+        )
 
         summary_args = [self.type, id, axes_info]
         abbreviated_info = "{0} {1} ({2})".format(*summary_args)
@@ -149,20 +171,22 @@ class ArrayStructure(Structure):
         # Otherwise write out summary to output
         if abbreviated:
             output.write(abbreviated_info)
-            output.write('\n')
+            output.write("\n")
             output.flush()
 
         else:
-            output.write('Axes for {0}: \n\n'.format(abbreviated_info))
+            output.write("Axes for {0}: \n\n".format(abbreviated_info))
 
             for axis in self.meta_data.get_axis_arrays():
-                output.write('{0} ({1} elements)\n'.format(axis['axis_name'], axis['elements']))
+                output.write(
+                    "{0} ({1} elements)\n".format(axis["axis_name"], axis["elements"])
+                )
 
             output.flush()
 
     @threaded_cached_property
     def data(self):
-        """ All data in the PDS4 array data structure.
+        """All data in the PDS4 array data structure.
 
         This property is implemented as a thread-safe cacheable attribute. Once it is run
         for the first time, it replaces itself with an attribute having the exact
@@ -183,13 +207,16 @@ class ArrayStructure(Structure):
         super(ArrayStructure, self).data()
 
         from .read_arrays import read_array_data
-        read_array_data(self, no_scale=self._no_scale, masked=self._masked, memmap=False)
+
+        read_array_data(
+            self, no_scale=self._no_scale, masked=self._masked, memmap=False
+        )
 
         return self.data
 
     @threaded_cached_property
     def section(self):
-        """ A section of the data in the PDS4 array data structure.
+        """A section of the data in the PDS4 array data structure.
 
         This property is implemented as a thread-safe cacheable attribute. See docstring of ``.data``
         for more info.
@@ -204,8 +231,12 @@ class ArrayStructure(Structure):
         from .read_arrays import read_array_data
 
         # Read-in data unscaled with memory mapping (scaled data is not guaranteed to be memory mapped)
-        structure = self.__class__(structure_meta_data=self.meta_data, structure_label=self.label,
-                                   full_label=self.full_label, parent_filename=self.parent_filename)
+        structure = self.__class__(
+            structure_meta_data=self.meta_data,
+            structure_label=self.label,
+            full_label=self.full_label,
+            parent_filename=self.parent_filename,
+        )
 
         read_array_data(structure, no_scale=True, masked=self._masked, memmap=True)
 
@@ -213,7 +244,7 @@ class ArrayStructure(Structure):
         return ArraySection(structure, self._no_scale)
 
     def as_masked(self):
-        """ Obtain a view of this ArrayStructure, with numeric Special_Constants masked.
+        """Obtain a view of this ArrayStructure, with numeric Special_Constants masked.
 
         Notes
         -----
@@ -227,15 +258,26 @@ class ArrayStructure(Structure):
             labels and meta data are all effectively views, no copies are made.
         """
 
-        kwargs = {'structure_meta_data': self.meta_data,
-                  'structure_label': self.label, 'full_label': self.full_label,
-                  'parent_filename': self.parent_filename, 'structure_id': self.id}
+        kwargs = {
+            "structure_meta_data": self.meta_data,
+            "structure_label": self.label,
+            "full_label": self.full_label,
+            "parent_filename": self.parent_filename,
+            "structure_id": self.id,
+        }
 
         # If data is already loaded, create a view of the ArrayStructure where the data is masked
         if self.data_loaded:
 
-            array_structure = self.from_array(self.data, no_scale=True, no_bitmask=True, masked=True,
-                                              copy=False, structure_data=self.data, **kwargs)
+            array_structure = self.from_array(
+                self.data,
+                no_scale=True,
+                no_bitmask=True,
+                masked=True,
+                copy=False,
+                structure_data=self.data,
+                **kwargs
+            )
 
         # If the data has not been loaded, create a view of ArrayStructure that indicates to mask data
         # when the attempt to access it is made later
@@ -248,7 +290,7 @@ class ArrayStructure(Structure):
 
 
 class ArraySection(object):
-    """ Stores and allows retrieval of a section of an array.
+    """Stores and allows retrieval of a section of an array.
 
     Used to extract and scale (if necessary) a portion of a PDS4 array. Usually this would be used for
     an array that is too large to hold entirely in memory.
@@ -273,7 +315,7 @@ class ArraySection(object):
         self._no_scale = no_scale
 
     def __getitem__(self, idx):
-        """ Obtain a portion of the array.
+        """Obtain a portion of the array.
 
         Parameters
         ----------
@@ -293,18 +335,20 @@ class ArraySection(object):
 
         # Adjust data values to account for 'scaling_factor' and 'value_offset' as necessary
         if not self._no_scale:
-            element_array = self._structure.meta_data['Element_Array']
-            special_constants = self._structure.meta_data.get('Special_Constants')
-            data = apply_scaling_and_value_offset(data,
-                                                  element_array.get('scaling_factor'),
-                                                  element_array.get('value_offset'),
-                                                  special_constants=special_constants)
+            element_array = self._structure.meta_data["Element_Array"]
+            special_constants = self._structure.meta_data.get("Special_Constants")
+            data = apply_scaling_and_value_offset(
+                data,
+                element_array.get("scaling_factor"),
+                element_array.get("value_offset"),
+                special_constants=special_constants,
+            )
 
         return data
 
 
 class Meta_ArrayStructure(Meta_Structure):
-    """ Meta data about a PDS4 array data structure.
+    """Meta data about a PDS4 array data structure.
 
     Meta data stored in this class is accessed in ``dict``-like fashion.  Stores meta data about all forms
     of Array (e.g. Array, Array_2D, Array_3D_Image, etc). Normally this meta data originates from the
@@ -356,7 +400,7 @@ class Meta_ArrayStructure(Meta_Structure):
 
     @classmethod
     def from_label(cls, xml_array, full_label=None):
-        """ Create a Meta_ArrayStructure from XML originating from a label.
+        """Create a Meta_ArrayStructure from XML originating from a label.
 
         Parameters
         ----------
@@ -380,36 +424,45 @@ class Meta_ArrayStructure(Meta_Structure):
         obj._load_keys_from_xml(xml_array)
 
         # Ensure required keys for Array_* exist
-        keys_must_exist = ['offset', 'axes', 'Axis_Array', 'Element_Array']
+        keys_must_exist = ["offset", "axes", "Axis_Array", "Element_Array"]
         obj._check_keys_exist(keys_must_exist)
 
         # Ensure required keys for Axis_Array(s) exist
-        axis_keys_must_exist = ['axis_name', 'elements', 'sequence_number']
+        axis_keys_must_exist = ["axis_name", "elements", "sequence_number"]
         multiple_axes = True if obj.num_axes() > 1 else False
-        obj._check_keys_exist(axis_keys_must_exist, sub_element='Axis_Array', is_sequence=multiple_axes)
+        obj._check_keys_exist(
+            axis_keys_must_exist, sub_element="Axis_Array", is_sequence=multiple_axes
+        )
 
         # Ensure required keys for Element_Array exist
-        obj._check_keys_exist(['data_type'], sub_element='Element_Array')
+        obj._check_keys_exist(["data_type"], sub_element="Element_Array")
 
-        # Add the Meta_DisplaySettings and Meta_SpectralCharacteristics if they exist in the label
-        if ('local_identifier' in obj) and (full_label is not None):
+        # Add the Meta_DisplaySettings and Meta_SpectralCharacteristics if they exist in
+        # the label
+        if ("local_identifier" in obj) and (full_label is not None):
 
-            local_identifier = six.text_type(obj['local_identifier'])
+            local_identifier = str(obj["local_identifier"])
 
             try:
-                obj.display_settings = Meta_DisplaySettings.from_full_label(full_label, local_identifier)
+                obj.display_settings = Meta_DisplaySettings.from_full_label(
+                    full_label, local_identifier
+                )
             except (KeyError, PDS4StandardsException):
                 pass
 
             try:
-                obj.spectral_characteristics = Meta_SpectralCharacteristics.from_full_label(full_label, local_identifier)
+                obj.spectral_characteristics = (
+                    Meta_SpectralCharacteristics.from_full_label(
+                        full_label, local_identifier
+                    )
+                )
             except (KeyError, PDS4StandardsException):
                 pass
 
         return obj
 
     def data_type(self):
-        """ Data type of the array elements.
+        """Data type of the array elements.
 
         Returns
         -------
@@ -417,7 +470,7 @@ class Meta_ArrayStructure(Meta_Structure):
             A PDS4 data type.
         """
 
-        return PDSdtype(self['Element_Array']['data_type'])
+        return PDSdtype(self["Element_Array"]["data_type"])
 
     def dimensions(self):
         """
@@ -427,7 +480,9 @@ class Meta_ArrayStructure(Meta_Structure):
             Dimensions of the array.
         """
 
-        dimensions = [axis_array['elements'] for axis_array in self.get_axis_arrays(sort=True)]
+        dimensions = [
+            axis_array["elements"] for axis_array in self.get_axis_arrays(sort=True)
+        ]
 
         return dimensions
 
@@ -442,7 +497,7 @@ class Meta_ArrayStructure(Meta_Structure):
         return len(self.get_axis_arrays())
 
     def get_axis_arrays(self, sort=True):
-        """ Convenience method to always obtain Axis_Arrays as a ``list``.
+        """Convenience method to always obtain Axis_Arrays as a ``list``.
 
         Parameters
         ----------
@@ -455,7 +510,7 @@ class Meta_ArrayStructure(Meta_Structure):
             List of ``OrderedDict``'s containing meta data about each Axis_Array.
         """
 
-        axis_arrays = self['Axis_Array']
+        axis_arrays = self["Axis_Array"]
 
         if isinstance(axis_arrays, (list, tuple)):
             axis_arrays = list(axis_arrays)
@@ -464,12 +519,12 @@ class Meta_ArrayStructure(Meta_Structure):
             axis_arrays = [axis_arrays]
 
         if sort:
-            axis_arrays = sorted(axis_arrays, key=lambda x: x['sequence_number'])
+            axis_arrays = sorted(axis_arrays, key=lambda x: x["sequence_number"])
 
         return axis_arrays
 
     def get_axis_array(self, axis_name=None, sequence_number=None):
-        """ Searches for a specific Axis_Array.
+        """Searches for a specific Axis_Array.
 
         Either *axis_name*, *sequence_number* or both must be specified.
         When both are given, then the result must match both values.
@@ -496,15 +551,19 @@ class Meta_ArrayStructure(Meta_Structure):
             # Find by both axis_name and sequence_number
             if (axis_name is not None) and (sequence_number is not None):
 
-                if (six.text_type(axis['axis_name']) == axis_name) and (axis['sequence_number'] == sequence_number):
+                if (str(axis["axis_name"]) == axis_name) and (
+                    axis["sequence_number"] == sequence_number
+                ):
                     retrieved_axis = axis
 
             # Find by axis_name
-            elif (axis_name is not None) and (six.text_type(axis['axis_name']) == axis_name):
+            elif (axis_name is not None) and (str(axis["axis_name"]) == axis_name):
                 retrieved_axis = axis
 
             # Find by sequence_number
-            elif (sequence_number is not None) and (axis['sequence_number'] == sequence_number):
+            elif (sequence_number is not None) and (
+                axis["sequence_number"] == sequence_number
+            ):
                 retrieved_axis = axis
 
         return retrieved_axis

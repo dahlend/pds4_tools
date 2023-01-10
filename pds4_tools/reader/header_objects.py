@@ -8,7 +8,6 @@ import sys
 from .general_objects import Structure, Meta_Structure
 
 from ..extern.cached_property import threaded_cached_property
-from ..extern import six
 
 
 class HeaderStructure(Structure):
@@ -306,7 +305,7 @@ class HeaderPlainTextParser(HeaderParser):
 
         data = self.structure.data
 
-        if isinstance(data, six.binary_type):
+        if isinstance(data, bytes):
             data = data.decode('utf-8')
 
         return data

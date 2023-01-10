@@ -1,15 +1,10 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import os
 from posixpath import join as urljoin
 
 
-class PDS4ToolsTestCase(object):
+class PDS4ToolsTestCase:
 
-    def setup(self):
+    def setup_method(self):
 
         self.local_data_dir = os.path.join(os.path.dirname(__file__), 'data')
         self.web_data_dir = 'https://raw.githubusercontent.com/Small-Bodies-Node/pds4_tools/master/pds4_tools/tests/data/'

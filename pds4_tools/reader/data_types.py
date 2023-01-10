@@ -10,8 +10,6 @@ import numpy as np
 from ..utils.deprecation import rename_parameter
 from ..utils.logging import logger_init
 
-from ..extern import six
-from ..extern.six.moves import builtins
 
 # Initialize the logger
 logger = logger_init()
@@ -248,8 +246,8 @@ def pds_to_builtin_type(data_type=None, data=None, decode_strings=False, decode_
 
         if is_character_data:
             unicode_requested = decode_strings and not is_bitstring_data
-            _type = six.text_type if (np.issubdtype(data.dtype, np.unicode_) or unicode_requested
-                                      ) else six.binary_type
+            _type = str if (np.issubdtype(data.dtype, np.unicode_) or unicode_requested
+                                      ) else bytes
         else:
             _type = type(np.asscalar(data[0]))
 
@@ -261,7 +259,7 @@ def pds_to_builtin_type(data_type=None, data=None, decode_strings=False, decode_
         is_character_data = (numeric_types is None) and (not is_datetime_data)
 
         if is_character_data:
-            _type = six.text_type if (decode_strings and not is_bitstring_data) else six.binary_type
+            _type = str if (decode_strings and not is_bitstring_data) else bytes
 
         elif is_datetime_data:
             _type = getattr(dt, datetime_types[2])
@@ -327,12 +325,12 @@ def numpy_to_pds_type(dtype, ascii_numerics=False):
         # Get numeric ASCII types. We obtain these from builtin portion because if we attempt to match
         # e.g. 'int16' to 'int64' it would fail but for ASCII types this should succeed.
         ascii_types = dict((value[2], key)
-                           for key, value in six.iteritems(PDS_NUMERIC_TYPES)
+                           for key, value in PDS_NUMERIC_TYPES.items()
                            if ('ASCII' in key) and ('Numeric_Base' not in key))
 
         # Get numeric non-ASCII types, including the correct endianness.
         non_ascii_types = dict((np.dtype(value[1]).newbyteorder(value[0]), key)
-                               for key, value in six.iteritems(PDS_NUMERIC_TYPES)
+                               for key, value in PDS_NUMERIC_TYPE.items()
                                if ('ASCII' not in key) and ('Numeric_Base' not in key))
 
         if ascii_numerics:
@@ -366,15 +364,10 @@ def pds_to_numpy_name(name):
         A NumPy-compliant field name.
     """
 
-    # We encode to UTF-8 because under Python 2 NumPy does not accept unicode. We replace
-    # the colon by an underscore because under Python 3 this seems to cause an error when using
-    # ``recarray.__new__`` with the ``buf`` keyword.
+    # We replace the colon by an underscore because under Python 3 this seems to cause
+    # an error when using ``recarray.__new__`` with the ``buf`` keyword.
 
-    name = name.replace(':', '_')
-    if six.PY2:
-        name = name.encode('utf-8')
-
-    return name
+    return name.replace(':', '_')
 
 
 def data_type_convert_array(data_type, byte_string):
@@ -457,7 +450,7 @@ def data_type_convert_table_ascii(data_type, data, mask_nulls=False, decode_stri
             if datum.strip() == b'':
                 mask_array[i] = True
 
-        data[mask_array] = six.ensure_binary(str(fill_value))
+        data[mask_array] = str(fill_value).encode('utf-8')
 
     # Special handling for boolean due to e.g. bool('false') = True
     if data_type == 'ASCII_Boolean':
@@ -641,7 +634,7 @@ def data_type_convert_dates(data, data_type=None, mask_nulls=False):
     for _format in formats:
 
         _edited_format = _format
-        for k, v in six.iteritems(symbol_lengths):
+        for k, v in symbol_lengths.items():
 
             if k in _edited_format:
                 _edited_format = _edited_format.replace(k,  ' ' * v)
@@ -656,7 +649,7 @@ def data_type_convert_dates(data, data_type=None, mask_nulls=False):
             format_lengths[fraction_length+i] = format
 
     # Decode input from bytes into strings, when necessary
-    if (not six.PY2) and (data.dtype.char == 'S'):
+    if data.dtype.char == 'S':
         data = decode_bytes_to_unicode(data)
 
     # Determine the format of the first data point
@@ -982,7 +975,7 @@ def mask_special_constants(data, special_constants, mask_strings=False, copy=Fal
         data_trimmed = np.char.strip(data)
         mask_array = np.zeros(0)
 
-        for key, value in six.iteritems(special_constants):
+        for key, value in special_constants.items():
 
             # Find which values should be masked, ignoring valid_* constants (which are actually valid data)
             if not key.startswith('valid_'):
@@ -996,7 +989,7 @@ def mask_special_constants(data, special_constants, mask_strings=False, copy=Fal
     # Mask numeric values
     else:
 
-        for key, value in six.iteritems(special_constants):
+        for key, value in special_constants.items():
 
             # The data == value equality check below only works on similar data types, otherwise it will raise
             # warnings/errors. Thus we circumvent this by assuming equality is False when this is guaranteed.
@@ -1127,7 +1120,7 @@ def is_pds_integer_data(data=None, pds_data_type=None):
             if np.ma.is_masked(data):
                 data = data.compressed()
 
-            if len(data) > 0 and isinstance(data[0], six.integer_types):
+            if len(data) > 0 and isinstance(data[0], int):
                 array_is_integer = True
 
     # Check if data type is a PDS4 integer type
@@ -1143,8 +1136,7 @@ def is_pds_integer_data(data=None, pds_data_type=None):
     return array_is_integer or pds_type_is_integer
 
 
-@six.python_2_unicode_compatible
-class PDSdtype(object):
+class PDSdtype:
     """ A PDS4 data type object.
 
     Each PDS4 array and table field contains homogeneous values described by a PDSdtype
@@ -1175,7 +1167,7 @@ class PDSdtype(object):
         if isinstance(name, cls):
             return name
 
-        elif isinstance(name, six.string_types):
+        elif isinstance(name, str):
             obj = super(PDSdtype, cls).__new__(cls)
             obj._name = name
 
@@ -1200,7 +1192,7 @@ class PDSdtype(object):
         str or unicode
             A str representation of the object.
         """
-        return six.text_type(self.name)
+        return str(self.name)
 
     def __repr__(self):
         """
@@ -1292,7 +1284,7 @@ class PDSdtype(object):
             Raised if a non-string-like subtype is specified.
         """
 
-        if isinstance(subtype, six.string_types):
+        if isinstance(subtype, str):
 
             subtype = subtype.lower()
 

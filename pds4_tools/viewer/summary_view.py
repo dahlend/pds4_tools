@@ -26,10 +26,8 @@ from ..reader.read_tables import table_data_size_check
 from ..utils.helpers import is_array_like
 from ..utils.logging import logger_init
 
-from ..extern import six
-from ..extern.six.moves.tkinter import (Menu, Canvas, Frame, Scrollbar, Label, Entry, Button, Radiobutton,
-                                        BooleanVar, StringVar)
-from ..extern.six.moves.tkinter_tkfiledialog import askopenfilename, asksaveasfilename
+from tkinter import (Canvas, Frame, Label, Entry, Button, Radiobutton, BooleanVar, StringVar)
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 # Initialize the logger
 logger = logger_init()
@@ -90,10 +88,10 @@ class StructureListWindow(Window):
             title += '' if (filename is None) else " for '{0}'".format(filename)
             self.set_window_title("{0} - {1}".format(self.get_window_title(), title))
 
-        except Exception as e:
+        except Exception:
 
             trace = traceback.format_exc()
-            if isinstance(trace, six.binary_type):
+            if isinstance(trace, bytes):
                 trace = trace.decode('utf-8')
 
             log = logger.get_handler('log_handler').get_recording()
@@ -299,7 +297,7 @@ class StructureListWindow(Window):
                     dimensions_text = '{0} cols X {1} rows'.format(dimensions[0], dimensions[1])
 
                 elif structure.is_array():
-                    dimensions_text = ' X '.join(six.text_type(dim) for dim in dimensions)
+                    dimensions_text = ' X '.join(str(dim) for dim in dimensions)
 
             dimension = Label(structures_frame, text=dimensions_text, font=self.get_font())
             structures_frame.grid_columnconfigure(3, minsize=165)
@@ -533,7 +531,7 @@ class StructureListWindow(Window):
 
         # Check that filename is a string type (some OS' return binary str and some unicode for filename).
         # Also check that it is neither None or empty (also depends on OS)
-        if isinstance(filename, (six.binary_type, six.text_type)) and (filename.strip() != ''):
+        if isinstance(filename, (bytes, str)) and (filename.strip() != ''):
 
             if new_window:
                 open_summary(self._viewer, filename=filename,
@@ -1004,7 +1002,7 @@ def _export_data(filename, data, delimiter=None, fmt=None, newline='\r\n'):
     # Formats a single data value according to PDS4 field_format
     def format_value(datum, format, is_bitstring=False, dtype=None):
 
-        if isinstance(datum, six.binary_type):
+        if isinstance(datum, bytes):
 
             # Handle bitstrings
             # (Note: we ensure dtype has correct length; otherwise trailing null bytes are skipped by NumPy)
@@ -1028,7 +1026,7 @@ def _export_data(filename, data, delimiter=None, fmt=None, newline='\r\n'):
         except (ValueError, TypeError):
             value = datum
 
-        return six.text_type(value)
+        return str(value)
 
     # Formats a NumPy ndarray to a string; similar to np.array2string's default functionality
     # but does not add newlines to deeply nested arrays
@@ -1103,7 +1101,7 @@ def _export_data(filename, data, delimiter=None, fmt=None, newline='\r\n'):
                 format = '%s' if is_scaled else meta_data.get('format', '%s')
                 formats.append(format)
 
-        elif isinstance(fmt, six.string_types) and fmt.lower() == 'none':
+        elif isinstance(fmt, str) and fmt.lower() == 'none':
             formats = ['%s'] * fmt
 
         elif is_array_like(fmt):
